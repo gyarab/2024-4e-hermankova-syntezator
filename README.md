@@ -1,1 +1,1 @@
-# 2024-4e-Hermankova-syntez-tor
+# 2024-4e-Hermankova-Syntezator
