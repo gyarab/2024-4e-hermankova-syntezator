@@ -1,6 +1,6 @@
 package org.example.synthesiser;
 
-import com.oracle.javafx.scenebuilder.kit.util.control.paintpicker.rotator.RotatorControl;
+import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -13,6 +13,7 @@ public class SynthController {
     @FXML
     private Canvas oscilloscopeCanvas;
 
+    // Doporučuji použít např. FlowPane pro lepší rozmístění, ale zde ponecháme Pane
     @FXML
     private Pane knobContainer;
 
@@ -20,13 +21,14 @@ public class SynthController {
     private Button sineButton, squareButton, sawButton, startButton;
 
     private SynthEngine synthEngine;
-    private byte[] buffer; // Deklarace bufferu
-    private static final int BUFFER_SIZE = 1024; // Velikost bufferu
+    // Buffer sloužící pro vizualizaci – počet vzorků odpovídá polovině velikosti audio bufferu
+    private byte[] buffer;
+    private static final int BUFFER_SIZE = 1024;
 
     @FXML
     public void initialize() {
         synthEngine = new SynthEngine();
-        buffer = new byte[BUFFER_SIZE]; // Inicializace bufferu
+        buffer = new byte[BUFFER_SIZE];
         setupKnobs();
         setupWaveButtons();
         setupStartButton();
@@ -36,11 +38,15 @@ public class SynthController {
     private void setupKnobs() {
         String[] knobs = {"Volume", "Tune", "Width", "Color", "Depth", "Attack", "Decay", "Sustain", "Release"};
         for (String knob : knobs) {
-            RotatorControl rotator = new RotatorControl(knob);
-            rotator.setRotate(0); // Start at 0 degrees
+            // Vytvoříme instanci našeho vlastního RotatorControl
+            RotatorControl rotator = new RotatorControl();
+            rotator.setMin(0);
+            rotator.setMax(270);  // Maximální úhel 270°
+            rotator.setKnobRotation(0); // Výchozí hodnota
 
             // Listener pro aktualizaci parametrů syntetizátoru
-            rotator.rotationProperty().addListener((observable, oldValue, newValue) -> {
+            // Používáme knobRotationProperty() naší třídy RotatorControl
+            rotator.knobRotationProperty().addListener((observable, oldValue, newValue) -> {
                 double value = (newValue.doubleValue() / 270) * getParameterRange(knob);
                 synthEngine.updateParameter(knob.toLowerCase(), value);
             });
@@ -52,23 +58,23 @@ public class SynthController {
     private double getParameterRange(String knob) {
         switch (knob) {
             case "Volume":
-                return 1.0; // 0 to 1
+                return 1.0; // 0 až 1
             case "Tune":
-                return 2000; // -1000 to 1000 Hz
+                return 2000; // -1000 až 1000 Hz (pozn.: případný offset lze doladit)
             case "Width":
-                return 1.0; // 0 to 1
+                return 1.0; // 0 až 1
             case "Color":
-                return 1.0; // 0 to 1
+                return 1.0; // 0 až 1
             case "Depth":
-                return 1.0; // 0 to 1
+                return 1.0; // 0 až 1
             case "Attack":
-                return 2.0; // 0 to 2 seconds
+                return 2.0; // 0 až 2 sekundy
             case "Decay":
-                return 2.0; // 0 to 2 seconds
+                return 2.0; // 0 až 2 sekundy
             case "Sustain":
-                return 1.0; // 0 to 1
+                return 1.0; // 0 až 1
             case "Release":
-                return 2.0; // 0 to 2 seconds
+                return 2.0; // 0 až 2 sekundy
             default:
                 return 1.0;
         }
@@ -92,11 +98,13 @@ public class SynthController {
         });
     }
 
+    // Osciloskop aktualizujeme pomocí AnimationTimer (běží v JavaFX vlákně)
     private void startOscilloscope() {
         GraphicsContext gc = oscilloscopeCanvas.getGraphicsContext2D();
-        new Thread(() -> {
-            while (true) {
-                double[] waveData = synthEngine.getWaveform(buffer.length / 2); // Předání délky bufferu
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                double[] waveData = synthEngine.getWaveform(buffer.length / 2);
                 gc.clearRect(0, 0, oscilloscopeCanvas.getWidth(), oscilloscopeCanvas.getHeight());
                 gc.setStroke(Color.LIME);
                 gc.setLineWidth(2);
@@ -107,11 +115,8 @@ public class SynthController {
                     double y2 = oscilloscopeCanvas.getHeight() / 2 - waveData[i + 1] * oscilloscopeCanvas.getHeight() / 2;
                     gc.strokeLine(x1, y1, x2, y2);
                 }
-                try {
-                    Thread.sleep(16); // ~60 FPS
-                } catch (InterruptedException ignored) {
-                }
             }
-        }).start();
+        };
+        timer.start();
     }
 }

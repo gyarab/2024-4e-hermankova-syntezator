@@ -1,9 +1,6 @@
 package org.example.synthesiser;
 
-import javafx.fxml.FXML;
-
 import javax.sound.sampled.*;
-import java.util.Arrays;
 
 public class SynthEngine {
 
@@ -12,23 +9,24 @@ public class SynthEngine {
     private FloatControl volumeControl;
 
     // Parametry syntézy
-    private double volume = 1.0;   // 0.0 to 1.0
+    private double volume = 1.0;   // 0.0 až 1.0
     private double tune = 440.0;    // Hz
-    private double width = 1.0;      // 0.0 to 1.0
-    private double color = 1.0;      // 0.0 to 1.0
-    private double depth = 1.0;      // 0.0 to 1.0
-    private double attack = 0.1;     // seconds
-    private double decay = 0.1;      // seconds
-    private double sustain = 1.0;    // 0.0 to 1.0
-    private double release = 0.1;    // seconds
+    private double width = 1.0;
+    private double color = 1.0;
+    private double depth = 1.0;
+    private double attack = 0.1;    // sekundy
+    private double decay = 0.1;     // sekundy
+    private double sustain = 1.0;   // 0.0 až 1.0
+    private double release = 0.1;   // sekundy
 
-
-
+    // Zachování kontinuity fáze mezi buffery
+    private double phase = 0.0;
+    private final double sampleRate = 44100.0;
 
     public SynthEngine() {
-        // Nastavení audio systému
+        // Inicializace audio systému, získání ovládání hlasitosti
         try {
-            AudioFormat format = new AudioFormat(44100, 16, 1, true, true);
+            AudioFormat format = new AudioFormat((float) sampleRate, 16, 1, true, true);
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
             SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
             line.open(format);
@@ -45,13 +43,11 @@ public class SynthEngine {
 
     public void start() {
         playing = true;
-        // Spustit syntézu zvuku
-        new Thread(this::generateSound).start();
+        new Thread(this::generateSound, "SynthSoundThread").start();
     }
 
     public void stop() {
         playing = false;
-        // Zastavit syntézu zvuku
     }
 
     public boolean isPlaying() {
@@ -59,36 +55,39 @@ public class SynthEngine {
     }
 
     public void updateParameter(String parameter, double value) {
-        // Aktualizovat specifický parametr
         switch (parameter) {
             case "volume":
-                volume = value; // Uložení hodnoty hlasitosti
-                float volumeDb = (float) (20 * Math.log10(value));
-                volumeControl.setValue(volumeDb);
+                volume = value;
+                if (value <= 0.0001) {
+                    volumeControl.setValue(volumeControl.getMinimum());
+                } else {
+                    float volumeDb = (float) (20 * Math.log10(value));
+                    volumeControl.setValue(volumeDb);
+                }
                 break;
             case "tune":
-                tune = value; // Uložení hodnoty ladění
+                tune = value;
                 break;
             case "width":
-                width = value; // Uložení šířky
+                width = value;
                 break;
             case "color":
-                color = value; // Uložení barvy
+                color = value;
                 break;
             case "depth":
-                depth = value; // Uložení hloubky
+                depth = value;
                 break;
             case "attack":
-                attack = value; // Uložení attack
+                attack = value;
                 break;
             case "decay":
-                decay = value; // Uložení decay
+                decay = value;
                 break;
             case "sustain":
-                sustain = value; // Uložení sustain
+                sustain = value;
                 break;
             case "release":
-                release = value; // Uložení release
+                release = value;
                 break;
             default:
                 break;
@@ -97,32 +96,21 @@ public class SynthEngine {
 
     private void generateSound() {
         try {
-            AudioFormat format = new AudioFormat(44100, 16, 1, true, true);
+            AudioFormat format = new AudioFormat((float) sampleRate, 16, 1, true, true);
             SourceDataLine line = AudioSystem.getSourceDataLine(format);
             line.open(format);
             line.start();
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[4096]; // 4096 bajtů = 2048 vzorků
 
             while (playing) {
-                // Generovat zvuk
-                double[] waveData = getWaveform(buffer.length); // Předání délky bufferu
-
-                // Zajistěte, že waveData má dostatečnou délku
-                if (waveData.length < buffer.length / 2) {
-                    System.out.println("Nedostatečná délka waveData.");
-                    continue; // Přeskočte tuto iteraci, pokud není dostatek dat
-                }
-
+                double[] waveData = getWaveform(buffer.length / 2);
                 for (int i = 0; i < buffer.length; i += 2) {
                     int sample = (int) (waveData[i / 2] * 32767);
                     buffer[i] = (byte) (sample & 0xFF);
                     buffer[i + 1] = (byte) ((sample >> 8) & 0xFF);
                 }
-
                 line.write(buffer, 0, buffer.length);
             }
-
-
 
             line.stop();
             line.close();
@@ -131,44 +119,46 @@ public class SynthEngine {
         }
     }
 
-    public double[] getWaveform(int bufferLength) {
-        // Simulovat waveform pro osciloskop
-        double[] wave = new double[bufferLength / 2]; // Polovina velikosti bufferu
-        double increment = (2 * Math.PI * tune) / 44100; // Vytvoření frekvence
-        double phase = 0.0;
+    /**
+     * Vrací pole vzorků v rozsahu -1 až 1.
+     * Simulace ADSR: pro každý buffer se počítá envelope na základě attack, decay a release.
+     * Pokud je buffer delší, zbytek je nastaven na sustain.
+     */
+    public double[] getWaveform(int sampleCount) {
+        double[] wave = new double[sampleCount];
+        double increment = (2 * Math.PI * tune) / sampleRate;
+        double envTotalTime = attack + decay + release;
+        for (int i = 0; i < sampleCount; i++) {
+            double tEnv = (i / (double) sampleCount) * envTotalTime;
+            double env;
+            if (tEnv < attack) {
+                env = tEnv / attack;
+            } else if (tEnv < attack + decay) {
+                env = 1 - ((tEnv - attack) / decay) * (1 - sustain);
+            } else if (tEnv < envTotalTime) {
+                env = sustain * (1 - ((tEnv - (attack + decay)) / release));
+            } else {
+                env = sustain;
+            }
 
-        for (int i = 0; i < wave.length; i++) {
-            double t = i / (double) wave.length; // Časový krok
-
+            double value = 0.0;
             switch (waveType) {
                 case "sine":
-                    wave[i] = volume * Math.sin(phase);
+                    value = Math.sin(phase);
                     break;
                 case "square":
-                    wave[i] = volume * (Math.sin(phase) >= 0 ? 1 : -1);
+                    value = Math.sin(phase) >= 0 ? 1 : -1;
                     break;
                 case "saw":
-                    wave[i] = volume * (2.0 * (t - Math.floor(t + 0.5)));
+                    value = 2.0 * (phase / (2 * Math.PI)) - 1;
                     break;
             }
-
-            // Přidání ADSR (Attack, Decay, Sustain, Release)
-            if (i < attack * wave.length) {
-                wave[i] *= (i / (attack * wave.length)); // Attack
-            } else if (i < (attack + decay) * wave.length) {
-                wave[i] *= (1 - (i - (attack * wave.length)) / (decay * wave.length)); // Decay
-            } else if (i < (attack + decay + sustain) * wave.length) {
-                wave[i] *= sustain; // Sustain
-            } else if (i < wave.length) {
-                wave[i] *= (1 - (i - ((attack + decay + sustain) * wave.length)) / ((release) * wave.length)); // Release
-            }
-
-            phase += increment; // Posun fáze pro další vzorek
+            wave[i] = volume * value * env;
+            phase += increment;
             if (phase >= 2 * Math.PI) {
-                phase -= 2 * Math.PI; // Udržení fáze v rozsahu
+                phase -= 2 * Math.PI;
             }
         }
         return wave;
     }
-
 }
