@@ -20,10 +20,13 @@ public class SynthController {
     private Button sineButton, squareButton, sawButton, startButton;
 
     private SynthEngine synthEngine;
+    private byte[] buffer; // Deklarace bufferu
+    private static final int BUFFER_SIZE = 1024; // Velikost bufferu
 
     @FXML
     public void initialize() {
         synthEngine = new SynthEngine();
+        buffer = new byte[BUFFER_SIZE]; // Inicializace bufferu
         setupKnobs();
         setupWaveButtons();
         setupStartButton();
@@ -93,7 +96,7 @@ public class SynthController {
         GraphicsContext gc = oscilloscopeCanvas.getGraphicsContext2D();
         new Thread(() -> {
             while (true) {
-                double[] waveData = synthEngine.getWaveform(); // Získání waveform podle aktuálního typu
+                double[] waveData = synthEngine.getWaveform(buffer.length / 2); // Předání délky bufferu
                 gc.clearRect(0, 0, oscilloscopeCanvas.getWidth(), oscilloscopeCanvas.getHeight());
                 gc.setStroke(Color.LIME);
                 gc.setLineWidth(2);

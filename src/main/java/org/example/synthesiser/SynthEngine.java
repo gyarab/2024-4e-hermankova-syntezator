@@ -1,5 +1,7 @@
 package org.example.synthesiser;
 
+import javafx.fxml.FXML;
+
 import javax.sound.sampled.*;
 import java.util.Arrays;
 
@@ -19,6 +21,9 @@ public class SynthEngine {
     private double decay = 0.1;      // seconds
     private double sustain = 1.0;    // 0.0 to 1.0
     private double release = 0.1;    // seconds
+
+
+
 
     public SynthEngine() {
         // Nastavení audio systému
@@ -100,14 +105,25 @@ public class SynthEngine {
 
             while (playing) {
                 // Generovat zvuk
-                double[] waveData = getWaveform();
+                double[] waveData = getWaveform(buffer.length); // Předání délky bufferu
+
+                // Zajistěte, že waveData má dostatečnou délku
+                if (waveData.length < buffer.length / 2) {
+                    System.out.println("Nedostatečná délka waveData.");
+                    continue; // Přeskočte tuto iteraci, pokud není dostatek dat
+                }
+
                 for (int i = 0; i < buffer.length; i += 2) {
                     int sample = (int) (waveData[i / 2] * 32767);
                     buffer[i] = (byte) (sample & 0xFF);
                     buffer[i + 1] = (byte) ((sample >> 8) & 0xFF);
                 }
+
                 line.write(buffer, 0, buffer.length);
             }
+
+
+
             line.stop();
             line.close();
         } catch (LineUnavailableException e) {
@@ -115,9 +131,9 @@ public class SynthEngine {
         }
     }
 
-    public double[] getWaveform() {
-        // Simulovat waveform pro oscilloscope
-        double[] wave = new double[100];
+    public double[] getWaveform(int bufferLength) {
+        // Simulovat waveform pro osciloskop
+        double[] wave = new double[bufferLength / 2]; // Polovina velikosti bufferu
         double increment = (2 * Math.PI * tune) / 44100; // Vytvoření frekvence
         double phase = 0.0;
 
@@ -154,4 +170,5 @@ public class SynthEngine {
         }
         return wave;
     }
+
 }
