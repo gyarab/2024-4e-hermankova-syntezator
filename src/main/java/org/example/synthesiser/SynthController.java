@@ -81,9 +81,9 @@ public class SynthController {
     }
 
     private void setupWaveButtons() {
-        sineButton.setOnAction(e -> synthEngine.setWaveType("sine"));
-        squareButton.setOnAction(e -> synthEngine.setWaveType("square"));
-        sawButton.setOnAction(e -> synthEngine.setWaveType("saw"));
+        sineButton.setOnAction(e -> synthEngine.setWaveType("Sine"));
+        squareButton.setOnAction(e -> synthEngine.setWaveType("Square"));
+        sawButton.setOnAction(e -> synthEngine.setWaveType("Saw"));
     }
 
     private void setupStartButton() {
