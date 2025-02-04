@@ -14,7 +14,6 @@ public class SynthController {
     @FXML
     private Canvas oscilloscopeCanvas;
 
-    // Doporučuji použít např. FlowPane pro lepší rozmístění, ale zde ponecháme Pane
     @FXML
     private Pane knobContainer;
 
