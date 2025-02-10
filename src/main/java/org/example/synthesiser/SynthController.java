@@ -39,14 +39,11 @@ public class SynthController {
     private void setupKnobs() {
         String[] knobs = {"Volume", "Tune", "Width", "Color", "Depth", "Attack", "Decay", "Sustain", "Release"};
         for (String knob : knobs) {
-            // Vytvoříme instanci našeho vlastního RotatorControl
-            RotatorControl rotator = new RotatorControl();
+            RotatorControl rotator = new RotatorControl(knob); // Předání názvu jako popisku
             rotator.setMin(0);
-            rotator.setMax(270);  // Maximální úhel 270°
-            rotator.setKnobRotation(0); // Výchozí hodnota
+            rotator.setMax(270);
 
             // Listener pro aktualizaci parametrů syntetizátoru
-            // Používáme knobRotationProperty() naší třídy RotatorControl
             rotator.knobRotationProperty().addListener((observable, oldValue, newValue) -> {
                 double value = (newValue.doubleValue() / 270) * getParameterRange(knob);
                 synthEngine.updateParameter(knob.toLowerCase(), value);
@@ -55,6 +52,7 @@ public class SynthController {
             knobContainer.getChildren().add(rotator);
         }
     }
+
 
     private double getParameterRange(String knob) {
         switch (knob) {
