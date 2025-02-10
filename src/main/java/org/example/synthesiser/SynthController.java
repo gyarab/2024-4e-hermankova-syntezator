@@ -14,7 +14,6 @@ public class SynthController {
     @FXML
     private Canvas oscilloscopeCanvas;
 
-    // Doporučuji použít např. FlowPane pro lepší rozmístění, ale zde ponecháme Pane
     @FXML
     private Pane knobContainer;
 
@@ -80,9 +79,9 @@ public class SynthController {
     }
 
     private void setupWaveButtons() {
-        sineButton.setOnAction(e -> synthEngine.setWaveType("sine"));
-        squareButton.setOnAction(e -> synthEngine.setWaveType("square"));
-        sawButton.setOnAction(e -> synthEngine.setWaveType("saw"));
+        sineButton.setOnAction(e -> synthEngine.setWaveType("Sine"));
+        squareButton.setOnAction(e -> synthEngine.setWaveType("Square"));
+        sawButton.setOnAction(e -> synthEngine.setWaveType("Saw"));
     }
 
     private void setupStartButton() {
