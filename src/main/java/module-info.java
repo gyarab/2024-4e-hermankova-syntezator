@@ -3,6 +3,7 @@ module org.example.synthesiser {
     requires javafx.fxml;
     requires com.gluonhq.scenebuilder.kit;
     requires java.desktop;
+    requires static lombok;
 
 
     opens org.example.synthesiser to javafx.fxml;

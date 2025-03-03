@@ -1,4 +1,3 @@
-
 package org.example.synthesiser;
 
 import javafx.animation.AnimationTimer;
@@ -21,7 +20,6 @@ public class SynthController {
     private Button sineButton, squareButton, sawButton, startButton;
 
     private SynthEngine synthEngine;
-    // Buffer sloužící pro vizualizaci – počet vzorků odpovídá polovině velikosti audio bufferu
     private byte[] buffer;
     private static final int BUFFER_SIZE = 1024;
 
@@ -38,50 +36,49 @@ public class SynthController {
     private void setupKnobs() {
         String[] knobs = {"Volume", "Tune", "Width", "Color", "Depth", "Attack", "Decay", "Sustain", "Release"};
         for (String knob : knobs) {
-            RotatorControl rotator = new RotatorControl(knob); // Předání názvu jako popisku
+            RotatorControl rotator = new RotatorControl(knob);
             rotator.setMin(0);
             rotator.setMax(270);
 
-            // Listener pro aktualizaci parametrů syntetizátoru
+            double initialRotation;
+            if (knob.equalsIgnoreCase("Tune")) {
+                initialRotation = ((synthEngine.getParameter("tune") + 1000) / 2000.0) * 270;
+            } else {
+                initialRotation = (synthEngine.getParameter(knob.toLowerCase()) / getParameterRange(knob)) * 270;
+            }
+            rotator.setKnobRotation(initialRotation);
+
             rotator.knobRotationProperty().addListener((observable, oldValue, newValue) -> {
                 double value = (newValue.doubleValue() / 270) * getParameterRange(knob);
-                synthEngine.updateParameter(knob.toLowerCase(), value);
+                if (knob.equalsIgnoreCase("Tune")) {
+                    value -= 1000;
+                }
+                synthEngine.updateParameter(knob.toLowerCase(), value + (knob.equalsIgnoreCase("Tune") ? 1000 : 0));
             });
 
             knobContainer.getChildren().add(rotator);
         }
     }
 
-
     private double getParameterRange(String knob) {
         switch (knob) {
-            case "Volume":
-                return 1.0; // 0 až 1
-            case "Tune":
-                return 2000; // -1000 až 1000 Hz (pozn.: případný offset lze doladit)
-            case "Width":
-                return 1.0; // 0 až 1
-            case "Color":
-                return 1.0; // 0 až 1
-            case "Depth":
-                return 1.0; // 0 až 1
-            case "Attack":
-                return 2.0; // 0 až 2 sekundy
-            case "Decay":
-                return 2.0; // 0 až 2 sekundy
-            case "Sustain":
-                return 1.0; // 0 až 1
-            case "Release":
-                return 2.0; // 0 až 2 sekundy
-            default:
-                return 1.0;
+            case "Volume": return 1.0;
+            case "Tune": return 2000;
+            case "Width": return 1.0;
+            case "Color": return 1.0;
+            case "Depth": return 1.0;
+            case "Attack": return 2.0;
+            case "Decay": return 2.0;
+            case "Sustain": return 1.0;
+            case "Release": return 2.0;
+            default: return 1.0;
         }
     }
 
     private void setupWaveButtons() {
-        sineButton.setOnAction(e -> synthEngine.setWaveType("Sine"));
-        squareButton.setOnAction(e -> synthEngine.setWaveType("Square"));
-        sawButton.setOnAction(e -> synthEngine.setWaveType("Saw"));
+        sineButton.setOnAction(e -> synthEngine.setWaveType("sine"));
+        squareButton.setOnAction(e -> synthEngine.setWaveType("square"));
+        sawButton.setOnAction(e -> synthEngine.setWaveType("saw"));
     }
 
     private void setupStartButton() {
@@ -96,7 +93,6 @@ public class SynthController {
         });
     }
 
-    // Osciloskop aktualizujeme pomocí AnimationTimer (běží v JavaFX vlákně)
     private void startOscilloscope() {
         GraphicsContext gc = oscilloscopeCanvas.getGraphicsContext2D();
         AnimationTimer timer = new AnimationTimer() {

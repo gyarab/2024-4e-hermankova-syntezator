@@ -18,27 +18,22 @@ public class RotatorControl extends VBox {
     private Text label;
 
     public RotatorControl(String labelText) {
-        // Načtení obrázku knobu
         Image knobImage = new Image(getClass().getResourceAsStream("/images/knob_image.png"));
         dialImage = new ImageView(knobImage);
         dialImage.setFitWidth(60);
         dialImage.setFitHeight(60);
 
-        // Vytvoření popisku
         label = new Text(labelText);
         label.setStyle("-fx-fill: #FFFFFF; -fx-font-size: 14px;");
 
-        // Uspořádání knobu a popisku ve VBoxu
         this.setSpacing(5);
         this.setAlignment(Pos.CENTER);
         this.getChildren().addAll(dialImage, label);
 
-        // Obsluha událostí myši pro otáčení knobu tahem
         dialImage.setOnMousePressed(event -> initialMouseY = event.getSceneY());
-
         dialImage.setOnMouseDragged(event -> {
             double deltaY = initialMouseY - event.getSceneY();
-            double rotationChange = deltaY * 0.5; // Nastavte citlivost podle potřeby
+            double rotationChange = deltaY * 0.5;
             setKnobRotation(getKnobRotation() + rotationChange);
             initialMouseY = event.getSceneY();
         });
