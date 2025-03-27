@@ -1,19 +1,33 @@
 # 2024-4e-hermankova-syntezator
 
 
-## Úvod
-Tento projekt představuje interaktivní syntetizátor vyvinutý v JavaFX, který simuluje klasický analogový syntetizátor. Umožňuje uživatelům experimentovat se zvukovými parametry a vytvářet jedinečné zvuky pomocí intuitivního uživatelského rozhraní.
+## Popis projektu
+Tento projekt je interaktivní syntetizátor vytvořený v JavaFX, který simuluje analogový syntezátor. 
+Uživatelé mohou upravovat parametry zvuku pomocí otočných knobů a sledovat změny na osciloskopu.
 
 ## Funkce
-- **Rotující Knoby**: Nastavení zvukových parametrů jako jsou volume, tune, width, color, depth, attack, decay, sustain a release.
-- **Dynamický Osciloskop**: Real-time vizualizace generovaného zvuku, která se animuje a mění v závislosti na nastavených parametrech.
-- **Výběr Tónových Typů**: Možnost přepínání mezi různými vlnovými formami (sine, square, saw).
+- **Rotující knoby** pro úpravu parametrů (volume, tune, width, color, depth, ADSR obálka).
+- **Tlačítka pro výběr vlnového průběhu** (sinus, obdélník, pila).
+- **Osciloskop** zobrazující zvukový signál v reálném čase.
+- **Grafické vylepšení** pomocí CSS pro moderní vzhled.
 
-## Technologie
-- **Jazyk**: Java
-- **Knihovna**: JavaFX
+## Instalace a spuštění
 
-## Instalace
-1. Klonujte tento repozitář:
-   ```bash
-   git clone https://github.com/gyarab/2024-4e-hermankova-syntezator.git
+1. **Naklonujte repozitář**
+    ```bash
+    git clone https://github.com/gyarab/2024-4e-hermankova-syntezator.git
+    ```
+
+2. **Otevřete projekt v IDE**
+    - Doporučeno: IntelliJ IDEA nebo Eclipse s podporou Maven.
+
+3. **Zkontrolujte závislosti**
+    - JDK 17+
+    - JavaFX knihovny (nutné přidat do `pom.xml` pokud nejsou zahrnuty)
+
+4. **Spusťte aplikaci**
+    - Hlavní třída: `MainApp.java`
+    - Příkaz:
+    ```bash
+    mvn javafx:run
+    ```
