@@ -23,7 +23,6 @@ Uživatelé mohou upravovat parametry zvuku pomocí otočných knobů a sledovat
 
 3. **Zkontrolujte závislosti**
     - JDK 17+
-    - JavaFX knihovny (nutné přidat do `pom.xml` pokud nejsou zahrnuty)
 
 4. **Spusťte aplikaci**
     - Hlavní třída: `MainApp.java`
