@@ -1,7 +1,7 @@
 /* styles.css */
 
 .background {
-    -fx-background-color: #2D2D2D; /* Hlavní pozadí */
+    -fx-background-color: #552d62; /* Tmavší pozadí pro lepší kontrast */
     -fx-padding: 10;
 }
 
@@ -21,13 +21,13 @@
 }
 
 .text {
-    -fx-fill: #FFFFFF; /* Barva textu */
+    -fx-fill: #d0d0d0; /* Barva textu */
     -fx-font-size: 14px;
 }
 
 .wave-button {
-    -fx-background-color: #007BFF; /* Barva pozadí tlačítek pro výběr vlny */
-    -fx-text-fill: white; /* Barva textu */
+    -fx-background-color: #b27fc5; /* Barva pozadí tlačítek pro výběr vlny */
+    -fx-text-fill: #181818; /* Barva textu  */
     -fx-font-size: 14px;
     -fx-padding: 10px 20px; /* Vnitřní okraje */
     -fx-background-radius: 5; /* Zaoblení rohů */
@@ -35,10 +35,16 @@
 }
 
 .start-button {
-    -fx-background-color: #28A745; /* Barva pozadí tlačítka Start/Stop */
-    -fx-text-fill: white; /* Barva textu */
+    -fx-background-color: #da98d9; /* Barva pozadí tlačítka Start/Stop */
+    -fx-text-fill: #FFFFFF; /* Barva textu - bílá pro dobrou čitelnost */
     -fx-font-size: 16px;
     -fx-padding: 8 16; /* Vnitřní okraje */
     -fx-background-radius: 5; /* Zaoblení rohů */
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 1); /* Stín */
+}
+
+/* Barva textu pod knoby */
+.knob-text {
+    -fx-fill: #FFFFFF; /* Bílý text pro dobrou čitelnost */
+    -fx-font-size: 12px;
 }
