@@ -2,7 +2,7 @@
 
 
 ## Popis projektu
-Tento projekt je interaktivní syntetizátor vytvořený v JavaFX, který simuluje analogový syntezátor. 
+Tento projekt je interaktivní syntetizátor vytvořený v JavaFX, který simuluje digitální syntezátor. 
 Uživatelé mohou upravovat parametry zvuku pomocí otočných knobů a sledovat změny na osciloskopu.
 
 ## Funkce
